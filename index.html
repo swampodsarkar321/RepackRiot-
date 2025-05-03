@@ -1,9 +1,13 @@
+<!-- MAIN SITE (index.html) -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repack riot - High Compressed PC Games</title>
+    <title>GameRepack - High Compressed PC Games</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
     <style>
         :root {
             --primary: #ff6600;
@@ -290,14 +294,13 @@
 </head>
 <body>
     <header>
-        <div class="logo">Repack Riot</div>
+        <div class="logo">GameRepack</div>
         <nav>
             <ul>
                 <li><a href="#">Home</a></li>
                 <li><a href="#">Games</a></li>
                 <li><a href="#">Request</a></li>
                 <li><a href="#">FAQ</a></li>
-                <li><a href="#" id="admin-login">Admin</a></li>
             </ul>
         </nav>
     </header>
@@ -321,7 +324,7 @@
         
         <h2 class="section-title" id="games">Latest Games</h2>
         <div class="games-grid" id="games-container">
-            <!-- Games will be loaded here dynamically -->
+            <!-- Games will be loaded here from Firebase -->
         </div>
     </div>
     
@@ -340,129 +343,40 @@
         </div>
     </div>
     
-    <!-- Admin Login Modal -->
-    <div class="modal" id="login-modal">
-        <div class="modal-content">
-            <span class="close-btn">&times;</span>
-            <h2>Admin Login</h2>
-            <form id="login-form">
-                <div style="margin-bottom: 1rem;">
-                    <label for="username" style="display: block; margin-bottom: 0.5rem;">Username</label>
-                    <input type="text" id="username" style="width: 100%; padding: 0.8rem;" required>
-                </div>
-                <div style="margin-bottom: 1rem;">
-                    <label for="password" style="display: block; margin-bottom: 0.5rem;">Password</label>
-                    <input type="password" id="password" style="width: 100%; padding: 0.8rem;" required>
-                </div>
-                <button type="submit" class="btn">Login</button>
-            </form>
-        </div>
-    </div>
-    
     <script>
-        // Sample game data
-        let games = [
-            {
-                id: 1,
-                title: "Cyberpunk 2077",
-                image: "https://via.placeholder.com/300x200",
-                size: "35GB",
-                repackSize: "28GB",
-                genre: "RPG, Open World",
-                releaseDate: "2020-12-10",
-                description: "Cyberpunk 2077 is an open-world, action-adventure story set in Night City, a megalopolis obsessed with power, glamour and body modification.",
-                mirrors: [
-                    { name: "Mirror 1", url: "#" },
-                    { name: "Mirror 2", url: "#" },
-                    { name: "Mirror 3", url: "#" }
-                ],
-                systemRequirements: {
-                    os: "Windows 7/10",
-                    processor: "Intel Core i5-3570K or AMD FX-8310",
-                    memory: "8GB RAM",
-                    graphics: "NVIDIA GTX 780 or AMD Radeon RX 470",
-                    storage: "70GB"
-                }
-            },
-            {
-                id: 2,
-                title: "Red Dead Redemption 2",
-                image: "https://via.placeholder.com/300x200",
-                size: "120GB",
-                repackSize: "80GB",
-                genre: "Action, Adventure",
-                releaseDate: "2019-11-05",
-                description: "America, 1899. The end of the Wild West era has begun. After a robbery goes badly wrong in the western town of Blackwater, Arthur Morgan and the Van der Linde gang are forced to flee.",
-                mirrors: [
-                    { name: "Mirror 1", url: "#" },
-                    { name: "Mirror 2", url: "#" }
-                ],
-                systemRequirements: {
-                    os: "Windows 7/10",
-                    processor: "Intel Core i5-2500K or AMD FX-6300",
-                    memory: "8GB RAM",
-                    graphics: "NVIDIA GTX 770 or AMD Radeon R9 280",
-                    storage: "150GB"
-                }
-            },
-            {
-                id: 3,
-                title: "The Witcher 3: Wild Hunt",
-                image: "https://via.placeholder.com/300x200",
-                size: "50GB",
-                repackSize: "35GB",
-                genre: "RPG, Open World",
-                releaseDate: "2015-05-19",
-                description: "The Witcher: Wild Hunt is a story-driven open world RPG set in a visually stunning fantasy universe full of meaningful choices and impactful consequences.",
-                mirrors: [
-                    { name: "Mirror 1", url: "#" },
-                    { name: "Mirror 2", url: "#" },
-                    { name: "Mirror 3", url: "#" },
-                    { name: "Mirror 4", url: "#" }
-                ],
-                systemRequirements: {
-                    os: "Windows 7/10",
-                    processor: "Intel Core i5-2500K or AMD Phenom II X4 940",
-                    memory: "6GB RAM",
-                    graphics: "NVIDIA GTX 660 or AMD Radeon HD 7870",
-                    storage: "50GB"
-                }
-            },
-            {
-                id: 4,
-                title: "Elden Ring",
-                image: "https://via.placeholder.com/300x200",
-                size: "45GB",
-                repackSize: "30GB",
-                genre: "RPG, Action",
-                releaseDate: "2022-02-25",
-                description: "THE NEW FANTASY ACTION RPG. Rise, Tarnished, and be guided by grace to brandish the power of the Elden Ring and become an Elden Lord in the Lands Between.",
-                mirrors: [
-                    { name: "Mirror 1", url: "#" },
-                    { name: "Mirror 2", url: "#" }
-                ],
-                systemRequirements: {
-                    os: "Windows 10/11",
-                    processor: "Intel Core i5-8400 or AMD Ryzen 3 3300X",
-                    memory: "12GB RAM",
-                    graphics: "NVIDIA GTX 1060 or AMD Radeon RX 580",
-                    storage: "60GB"
-                }
-            }
-        ];
-        
-        // Load games on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            renderGames(games);
-            
-            // Check if there's saved game data in localStorage
-            const savedGames = localStorage.getItem('games');
-            if (savedGames) {
-                games = JSON.parse(savedGames);
-                renderGames(games);
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyB0fkLpu2BMFYZwUD62VCHyzl0WL83PiZM",
+            authDomain: "bloodzonebattle.firebaseapp.com",
+            databaseURL: "https://bloodzonebattle-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "bloodzonebattle",
+            storageBucket: "bloodzonebattle.appspot.com",
+            messagingSenderId: "1076060542688",
+            appId: "1:1076060542688:web:be696d81eb0172eee22285",
+            measurementId: "G-4TEN1VC0VN"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // Reference to games in Firebase
+        const gamesRef = database.ref('games');
+
+        // Load games from Firebase
+        gamesRef.on('value', (snapshot) => {
+            const gamesData = snapshot.val();
+            if (gamesData) {
+                const gamesArray = Object.keys(gamesData).map(key => ({
+                    id: key,
+                    ...gamesData[key]
+                }));
+                renderGames(gamesArray);
+            } else {
+                document.getElementById('games-container').innerHTML = '<p>No games available yet.</p>';
             }
         });
-        
+
         // Render games to the page
         function renderGames(gamesToRender) {
             const gamesContainer = document.getElementById('games-container');
@@ -472,7 +386,7 @@
                 const gameCard = document.createElement('div');
                 gameCard.className = 'game-card';
                 gameCard.innerHTML = `
-                    <img src="${game.image}" alt="${game.title}">
+                    <img src="${game.image}" alt="${game.title}" onerror="this.src='https://via.placeholder.com/300x200'">
                     <div class="game-info">
                         <h3>${game.title}</h3>
                         <div class="game-meta">
@@ -490,7 +404,7 @@
             document.querySelectorAll('.view-details').forEach(button => {
                 button.addEventListener('click', function(e) {
                     e.preventDefault();
-                    const gameId = parseInt(this.getAttribute('data-id'));
+                    const gameId = this.getAttribute('data-id');
                     showGameDetails(gameId);
                 });
             });
@@ -498,67 +412,91 @@
         
         // Show game details in modal
         function showGameDetails(gameId) {
-            const game = games.find(g => g.id === gameId);
-            if (!game) return;
-            
-            const modalContent = document.getElementById('game-details-content');
-            modalContent.innerHTML = `
-                <div class="game-header">
-                    <img src="${game.image}" alt="${game.title}">
-                    <div class="game-header-info">
-                        <h2>${game.title}</h2>
-                        <div class="game-specs">
-                            <div><strong>Original Size:</strong> ${game.size}</div>
-                            <div><strong>Repack Size:</strong> ${game.repackSize}</div>
-                            <div><strong>Genre:</strong> ${game.genre}</div>
-                            <div><strong>Release Date:</strong> ${game.releaseDate}</div>
+            gamesRef.child(gameId).once('value', (snapshot) => {
+                const game = snapshot.val();
+                if (!game) return;
+                
+                const modalContent = document.getElementById('game-details-content');
+                modalContent.innerHTML = `
+                    <div class="game-header">
+                        <img src="${game.image}" alt="${game.title}" onerror="this.src='https://via.placeholder.com/300x200'">
+                        <div class="game-header-info">
+                            <h2>${game.title}</h2>
+                            <div class="game-specs">
+                                <div><strong>Original Size:</strong> ${game.size}</div>
+                                <div><strong>Repack Size:</strong> ${game.repackSize}</div>
+                                <div><strong>Genre:</strong> ${game.genre}</div>
+                                <div><strong>Release Date:</strong> ${game.releaseDate}</div>
+                            </div>
+                            <p>${game.description}</p>
                         </div>
-                        <p>${game.description}</p>
                     </div>
-                </div>
-                
-                <div>
-                    <h3>System Requirements</h3>
-                    <div class="game-specs">
-                        <div><strong>OS:</strong> ${game.systemRequirements.os}</div>
-                        <div><strong>Processor:</strong> ${game.systemRequirements.processor}</div>
-                        <div><strong>Memory:</strong> ${game.systemRequirements.memory}</div>
-                        <div><strong>Graphics:</strong> ${game.systemRequirements.graphics}</div>
-                        <div><strong>Storage:</strong> ${game.systemRequirements.storage}</div>
+                    
+                    <div>
+                        <h3>System Requirements</h3>
+                        <div class="game-specs">
+                            <div><strong>OS:</strong> ${game.systemRequirements.os}</div>
+                            <div><strong>Processor:</strong> ${game.systemRequirements.processor}</div>
+                            <div><strong>Memory:</strong> ${game.systemRequirements.memory}</div>
+                            <div><strong>Graphics:</strong> ${game.systemRequirements.graphics}</div>
+                            <div><strong>Storage:</strong> ${game.systemRequirements.storage}</div>
+                        </div>
                     </div>
-                </div>
+                    
+                    <div class="download-links">
+                        <h3>Download Links</h3>
+                        ${game.mirrors.map((mirror, index) => 
+                            `<a href="${mirror.url}" class="btn" target="_blank">Mirror ${index + 1}</a>`
+                        ).join('')}
+                    </div>
+                `;
                 
-                <div class="download-links">
-                    <h3>Download Links</h3>
-                    ${game.mirrors.map(mirror => `<a href="${mirror.url}" class="btn" target="_blank">${mirror.name}</a>`).join('')}
-                </div>
-            `;
-            
-            document.getElementById('game-modal').style.display = 'block';
+                document.getElementById('game-modal').style.display = 'block';
+            });
         }
         
         // Search functionality
         document.getElementById('search-btn').addEventListener('click', function() {
             const searchTerm = document.getElementById('search-input').value.toLowerCase();
             if (searchTerm.trim() === '') {
-                renderGames(games);
+                // If search is empty, show all games
+                gamesRef.once('value', (snapshot) => {
+                    const gamesData = snapshot.val();
+                    if (gamesData) {
+                        const gamesArray = Object.keys(gamesData).map(key => ({
+                            id: key,
+                            ...gamesData[key]
+                        }));
+                        renderGames(gamesArray);
+                    }
+                });
                 return;
             }
             
-            const filteredGames = games.filter(game => 
-                game.title.toLowerCase().includes(searchTerm) || 
-                game.genre.toLowerCase().includes(searchTerm) ||
-                game.description.toLowerCase().includes(searchTerm)
-            );
-            
-            renderGames(filteredGames);
+            // Search through games
+            gamesRef.once('value', (snapshot) => {
+                const gamesData = snapshot.val();
+                if (gamesData) {
+                    const gamesArray = Object.keys(gamesData).map(key => ({
+                        id: key,
+                        ...gamesData[key]
+                    }));
+                    
+                    const filteredGames = gamesArray.filter(game => 
+                        game.title.toLowerCase().includes(searchTerm) || 
+                        game.genre.toLowerCase().includes(searchTerm) ||
+                        game.description.toLowerCase().includes(searchTerm)
+                    );
+                    
+                    renderGames(filteredGames);
+                }
+            });
         });
         
         // Close modals when clicking X
         document.querySelectorAll('.close-btn').forEach(btn => {
             btn.addEventListener('click', function() {
                 document.getElementById('game-modal').style.display = 'none';
-                document.getElementById('login-modal').style.display = 'none';
             });
         });
         
@@ -567,386 +505,7 @@
             if (e.target === document.getElementById('game-modal')) {
                 document.getElementById('game-modal').style.display = 'none';
             }
-            if (e.target === document.getElementById('login-modal')) {
-                document.getElementById('login-modal').style.display = 'none';
-            }
         });
-        
-        // Admin login
-        document.getElementById('admin-login').addEventListener('click', function(e) {
-            e.preventDefault();
-            document.getElementById('login-modal').style.display = 'block';
-        });
-        
-        // Login form submission
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            
-            // Simple check (in a real app, this would be a server-side check)
-            if (username === 'admin' && password === 'admin123') {
-                alert('Login successful! Redirecting to admin panel...');
-                document.getElementById('login-modal').style.display = 'none';
-                // In a real app, you would redirect to a separate admin page
-                // For this demo, we'll just show the admin panel in the same page
-                showAdminPanel();
-            } else {
-                alert('Invalid credentials!');
-            }
-        });
-        
-        // Show admin panel
-        function showAdminPanel() {
-            const container = document.querySelector('.container');
-            container.innerHTML = `
-                <h2 class="section-title">Admin Panel</h2>
-                <div style="margin-bottom: 2rem;">
-                    <button id="add-game-btn" class="btn">Add New Game</button>
-                    <button id="logout-btn" class="btn" style="background-color: #ff3333; margin-left: 1rem;">Logout</button>
-                </div>
-                
-                <div id="games-list">
-                    <h3>Current Games</h3>
-                    <table style="width: 100%; border-collapse: collapse; margin-top: 1rem;">
-                        <thead>
-                            <tr style="background-color: #444;">
-                                <th style="padding: 0.8rem; text-align: left;">ID</th>
-                                <th style="padding: 0.8rem; text-align: left;">Title</th>
-                                <th style="padding: 0.8rem; text-align: left;">Repack Size</th>
-                                <th style="padding: 0.8rem; text-align: left;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="admin-games-table">
-                            <!-- Games will be listed here -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <!-- Add/Edit Game Form (hidden by default) -->
-                <div id="game-form-container" style="display: none; margin-top: 2rem; background-color: #333; padding: 1.5rem; border-radius: 5px;">
-                    <h3 id="form-title">Add New Game</h3>
-                    <form id="game-form">
-                        <input type="hidden" id="game-id">
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem;">Title</label>
-                            <input type="text" id="game-title" style="width: 100%; padding: 0.8rem;" required>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem;">Image URL</label>
-                            <input type="text" id="game-image" style="width: 100%; padding: 0.8rem;" required>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem;">Original Size</label>
-                            <input type="text" id="game-size" style="width: 100%; padding: 0.8rem;" required>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem;">Repack Size</label>
-                            <input type="text" id="game-repack-size" style="width: 100%; padding: 0.8rem;" required>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem;">Genre</label>
-                            <input type="text" id="game-genre" style="width: 100%; padding: 0.8rem;" required>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem;">Release Date</label>
-                            <input type="date" id="game-release-date" style="width: 100%; padding: 0.8rem;" required>
-                        </div>
-                        <div style="margin-bottom: 1rem;">
-                            <label style="display: block; margin-bottom: 0.5rem;">Description</label>
-                            <textarea id="game-description" style="width: 100%; padding: 0.8rem; min-height: 100px;" required></textarea>
-                        </div>
-                        
-                        <h4 style="margin: 1rem 0;">System Requirements</h4>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1rem;">
-                            <div>
-                                <label style="display: block; margin-bottom: 0.5rem;">OS</label>
-                                <input type="text" id="game-os" style="width: 100%; padding: 0.8rem;" required>
-                            </div>
-                            <div>
-                                <label style="display: block; margin-bottom: 0.5rem;">Processor</label>
-                                <input type="text" id="game-processor" style="width: 100%; padding: 0.8rem;" required>
-                            </div>
-                            <div>
-                                <label style="display: block; margin-bottom: 0.5rem;">Memory</label>
-                                <input type="text" id="game-memory" style="width: 100%; padding: 0.8rem;" required>
-                            </div>
-                            <div>
-                                <label style="display: block; margin-bottom: 0.5rem;">Graphics</label>
-                                <input type="text" id="game-graphics" style="width: 100%; padding: 0.8rem;" required>
-                            </div>
-                            <div>
-                                <label style="display: block; margin-bottom: 0.5rem;">Storage</label>
-                                <input type="text" id="game-storage" style="width: 100%; padding: 0.8rem;" required>
-                            </div>
-                        </div>
-                        
-                        <h4 style="margin: 1rem 0;">Download Links</h4>
-                        <div id="mirrors-container">
-                            <div class="mirror-item" style="display: flex; gap: 1rem; margin-bottom: 1rem;">
-                                <input type="text" placeholder="Mirror Name" class="mirror-name" style="flex: 1; padding: 0.8rem;">
-                                <input type="text" placeholder="Mirror URL" class="mirror-url" style="flex: 2; padding: 0.8rem;">
-                                <button type="button" class="btn remove-mirror" style="background-color: #ff3333;">Remove</button>
-                            </div>
-                        </div>
-                        <button type="button" id="add-mirror" class="btn" style="margin-bottom: 1rem;">Add Another Mirror</button>
-                        
-                        <div style="display: flex; gap: 1rem;">
-                            <button type="submit" class="btn">Save Game</button>
-                            <button type="button" id="cancel-form" class="btn" style="background-color: #666;">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            `;
-            
-            // Render games in admin table
-            renderAdminGamesTable();
-            
-            // Add event listeners for admin panel
-            document.getElementById('add-game-btn').addEventListener('click', function() {
-                document.getElementById('game-form-container').style.display = 'block';
-                document.getElementById('form-title').textContent = 'Add New Game';
-                document.getElementById('game-form').reset();
-                document.getElementById('game-id').value = '';
-                
-                // Clear all mirrors except one
-                const mirrorsContainer = document.getElementById('mirrors-container');
-                while (mirrorsContainer.children.length > 1) {
-                    mirrorsContainer.removeChild(mirrorsContainer.lastChild);
-                }
-                
-                // Reset the first mirror inputs
-                const firstMirror = mirrorsContainer.firstElementChild;
-                firstMirror.querySelector('.mirror-name').value = '';
-                firstMirror.querySelector('.mirror-url').value = '';
-            });
-            
-            document.getElementById('add-mirror').addEventListener('click', function() {
-                const mirrorsContainer = document.getElementById('mirrors-container');
-                const newMirror = document.createElement('div');
-                newMirror.className = 'mirror-item';
-                newMirror.style.display = 'flex';
-                newMirror.style.gap = '1rem';
-                newMirror.style.marginBottom = '1rem';
-                newMirror.innerHTML = `
-                    <input type="text" placeholder="Mirror Name" class="mirror-name" style="flex: 1; padding: 0.8rem;">
-                    <input type="text" placeholder="Mirror URL" class="mirror-url" style="flex: 2; padding: 0.8rem;">
-                    <button type="button" class="btn remove-mirror" style="background-color: #ff3333;">Remove</button>
-                `;
-                mirrorsContainer.appendChild(newMirror);
-                
-                // Add event listener to the new remove button
-                newMirror.querySelector('.remove-mirror').addEventListener('click', function() {
-                    mirrorsContainer.removeChild(newMirror);
-                });
-            });
-            
-            document.getElementById('cancel-form').addEventListener('click', function() {
-                document.getElementById('game-form-container').style.display = 'none';
-            });
-            
-            document.getElementById('logout-btn').addEventListener('click', function() {
-                location.reload();
-            });
-            
-            document.getElementById('game-form').addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Get form values
-                const id = document.getElementById('game-id').value;
-                const title = document.getElementById('game-title').value;
-                const image = document.getElementById('game-image').value;
-                const size = document.getElementById('game-size').value;
-                const repackSize = document.getElementById('game-repack-size').value;
-                const genre = document.getElementById('game-genre').value;
-                const releaseDate = document.getElementById('game-release-date').value;
-                const description = document.getElementById('game-description').value;
-                
-                // Get system requirements
-                const systemRequirements = {
-                    os: document.getElementById('game-os').value,
-                    processor: document.getElementById('game-processor').value,
-                    memory: document.getElementById('game-memory').value,
-                    graphics: document.getElementById('game-graphics').value,
-                    storage: document.getElementById('game-storage').value
-                };
-                
-                // Get mirrors
-                const mirrors = [];
-                document.querySelectorAll('.mirror-item').forEach(item => {
-                    const name = item.querySelector('.mirror-name').value;
-                    const url = item.querySelector('.mirror-url').value;
-                    if (name && url) {
-                        mirrors.push({ name, url });
-                    }
-                });
-                
-                if (mirrors.length === 0) {
-                    alert('Please add at least one download mirror!');
-                    return;
-                }
-                
-                // Create game object
-                const game = {
-                    id: id ? parseInt(id) : games.length > 0 ? Math.max(...games.map(g => g.id)) + 1 : 1,
-                    title,
-                    image,
-                    size,
-                    repackSize,
-                    genre,
-                    releaseDate,
-                    description,
-                    systemRequirements,
-                    mirrors
-                };
-                
-                // Add or update game
-                if (id) {
-                    // Update existing game
-                    const index = games.findIndex(g => g.id === parseInt(id));
-                    if (index !== -1) {
-                        games[index] = game;
-                    }
-                } else {
-                    // Add new game
-                    games.push(game);
-                }
-                
-                // Save to localStorage
-                localStorage.setItem('games', JSON.stringify(games));
-                
-                // Refresh admin table and hide form
-                renderAdminGamesTable();
-                document.getElementById('game-form-container').style.display = 'none';
-                
-                alert('Game saved successfully!');
-            });
-        }
-        
-        // Render games in admin table
-        function renderAdminGamesTable() {
-            const table = document.getElementById('admin-games-table');
-            table.innerHTML = '';
-            
-            games.forEach(game => {
-                const row = document.createElement('tr');
-                row.style.borderBottom = '1px solid #444';
-                row.innerHTML = `
-                    <td style="padding: 0.8rem;">${game.id}</td>
-                    <td style="padding: 0.8rem;">${game.title}</td>
-                    <td style="padding: 0.8rem;">${game.repackSize}</td>
-                    <td style="padding: 0.8rem;">
-                        <button class="btn edit-game" data-id="${game.id}" style="padding: 0.3rem 0.8rem; font-size: 0.9rem;">Edit</button>
-                        <button class="btn delete-game" data-id="${game.id}" style="padding: 0.3rem 0.8rem; font-size: 0.9rem; background-color: #ff3333; margin-left: 0.5rem;">Delete</button>
-                    </td>
-                `;
-                table.appendChild(row);
-            });
-            
-            // Add event listeners to edit buttons
-            document.querySelectorAll('.edit-game').forEach(button => {
-                button.addEventListener('click', function() {
-                    const gameId = parseInt(this.getAttribute('data-id'));
-                    editGame(gameId);
-                });
-            });
-            
-            // Add event listeners to delete buttons
-            document.querySelectorAll('.delete-game').forEach(button => {
-                button.addEventListener('click', function() {
-                    const gameId = parseInt(this.getAttribute('data-id'));
-                    if (confirm('Are you sure you want to delete this game?')) {
-                        deleteGame(gameId);
-                    }
-                });
-            });
-        }
-        
-        // Edit game
-        function editGame(gameId) {
-            const game = games.find(g => g.id === gameId);
-            if (!game) return;
-            
-            document.getElementById('game-form-container').style.display = 'block';
-            document.getElementById('form-title').textContent = 'Edit Game';
-            
-            // Fill form with game data
-            document.getElementById('game-id').value = game.id;
-            document.getElementById('game-title').value = game.title;
-            document.getElementById('game-image').value = game.image;
-            document.getElementById('game-size').value = game.size;
-            document.getElementById('game-repack-size').value = game.repackSize;
-            document.getElementById('game-genre').value = game.genre;
-            document.getElementById('game-release-date').value = game.releaseDate;
-            document.getElementById('game-description').value = game.description;
-            
-            // Fill system requirements
-            document.getElementById('game-os').value = game.systemRequirements.os;
-            document.getElementById('game-processor').value = game.systemRequirements.processor;
-            document.getElementById('game-memory').value = game.systemRequirements.memory;
-            document.getElementById('game-graphics').value = game.systemRequirements.graphics;
-            document.getElementById('game-storage').value = game.systemRequirements.storage;
-            
-            // Fill mirrors
-            const mirrorsContainer = document.getElementById('mirrors-container');
-            mirrorsContainer.innerHTML = '';
-            
-            game.mirrors.forEach((mirror, index) => {
-                const mirrorDiv = document.createElement('div');
-                mirrorDiv.className = 'mirror-item';
-                mirrorDiv.style.display = 'flex';
-                mirrorDiv.style.gap = '1rem';
-                mirrorDiv.style.marginBottom = '1rem';
-                mirrorDiv.innerHTML = `
-                    <input type="text" placeholder="Mirror Name" class="mirror-name" value="${mirror.name}" style="flex: 1; padding: 0.8rem;">
-                    <input type="text" placeholder="Mirror URL" class="mirror-url" value="${mirror.url}" style="flex: 2; padding: 0.8rem;">
-                    <button type="button" class="btn remove-mirror" style="background-color: #ff3333;">Remove</button>
-                `;
-                mirrorsContainer.appendChild(mirrorDiv);
-                
-                // Add event listener to remove button
-                mirrorDiv.querySelector('.remove-mirror').addEventListener('click', function() {
-                    if (mirrorsContainer.children.length > 1) {
-                        mirrorsContainer.removeChild(mirrorDiv);
-                    } else {
-                        // If it's the last mirror, just clear the inputs
-                        mirrorDiv.querySelector('.mirror-name').value = '';
-                        mirrorDiv.querySelector('.mirror-url').value = '';
-                    }
-                });
-            });
-            
-            // If no mirrors (shouldn't happen), add one empty mirror
-            if (game.mirrors.length === 0) {
-                const mirrorDiv = document.createElement('div');
-                mirrorDiv.className = 'mirror-item';
-                mirrorDiv.style.display = 'flex';
-                mirrorDiv.style.gap = '1rem';
-                mirrorDiv.style.marginBottom = '1rem';
-                mirrorDiv.innerHTML = `
-                    <input type="text" placeholder="Mirror Name" class="mirror-name" style="flex: 1; padding: 0.8rem;">
-                    <input type="text" placeholder="Mirror URL" class="mirror-url" style="flex: 2; padding: 0.8rem;">
-                    <button type="button" class="btn remove-mirror" style="background-color: #ff3333;">Remove</button>
-                `;
-                mirrorsContainer.appendChild(mirrorDiv);
-                
-                mirrorDiv.querySelector('.remove-mirror').addEventListener('click', function() {
-                    if (mirrorsContainer.children.length > 1) {
-                        mirrorsContainer.removeChild(mirrorDiv);
-                    } else {
-                        mirrorDiv.querySelector('.mirror-name').value = '';
-                        mirrorDiv.querySelector('.mirror-url').value = '';
-                    }
-                });
-            }
-        }
-        
-        // Delete game
-        function deleteGame(gameId) {
-            games = games.filter(g => g.id !== gameId);
-            localStorage.setItem('games', JSON.stringify(games));
-            renderAdminGamesTable();
-        }
     </script>
 </body>
 </html>
